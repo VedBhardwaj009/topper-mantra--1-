@@ -1,6 +1,13 @@
 "use client"
 
 import type React from "react"
+import { 
+  FormSubmitEvent, 
+  InputChangeEvent, 
+  TextareaChangeEvent,
+  SelectChangeEvent,
+  ButtonClickEvent 
+} from "../types/events"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -61,17 +68,31 @@ export default function Home() {
     setMounted(true)
   }, [])
 
-  const handleReserveClick = (e: React.MouseEvent) => {
+  const handleReserveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setIsReservationDialogOpen(true)
   }
 
-  const handleQuickReservationSubmit = (e: React.FormEvent) => {
+  const handleQuickReservationSubmit = async (e: FormSubmitEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...quickReservationData,
+          type: 'reservation'
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send notification')
+      }
+
       setIsSubmitting(false)
       setIsReservationDialogOpen(false)
       setQuickReservationData({
@@ -87,10 +108,18 @@ export default function Home() {
         variant: "default",
         duration: 5000,
       })
-    }, 1500)
+    } catch (error) {
+      setIsSubmitting(false)
+      toast({
+        title: "Error",
+        description: "Failed to send reservation request. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      })
+    }
   }
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleFormChange = (e: InputChangeEvent | TextareaChangeEvent | SelectChangeEvent) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -98,14 +127,27 @@ export default function Home() {
     }))
   }
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: FormSubmitEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const response = await fetch('/api/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          type: 'enquiry'
+        }),
+      })
 
+      if (!response.ok) {
+        throw new Error('Failed to send notification')
+      }
+
+      setIsSubmitting(false)
       toast({
         title: "Form Submitted Successfully!",
         description: (
@@ -130,7 +172,15 @@ export default function Home() {
         course: "",
         message: "",
       })
-    }, 1500)
+    } catch (error) {
+      setIsSubmitting(false)
+      toast({
+        title: "Error",
+        description: "Failed to submit form. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      })
+    }
   }
 
   if (!mounted) {
@@ -154,7 +204,7 @@ export default function Home() {
             <Link
               href="#about"
               className="text-sm font-medium hover:text-primary transition-colors"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 e.preventDefault()
                 document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
               }}
@@ -164,7 +214,7 @@ export default function Home() {
             <Link
               href="#courses"
               className="text-sm font-medium hover:text-primary transition-colors"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 e.preventDefault()
                 document.getElementById("courses")?.scrollIntoView({ behavior: "smooth" })
               }}
@@ -174,7 +224,7 @@ export default function Home() {
             <Link
               href="#guidance"
               className="text-sm font-medium hover:text-primary transition-colors"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 e.preventDefault()
                 document.getElementById("guidance")?.scrollIntoView({ behavior: "smooth" })
               }}
@@ -184,7 +234,7 @@ export default function Home() {
             <Link
               href="#location"
               className="text-sm font-medium hover:text-primary transition-colors"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 e.preventDefault()
                 document.getElementById("location")?.scrollIntoView({ behavior: "smooth" })
               }}
@@ -194,7 +244,7 @@ export default function Home() {
             <Link
               href="#contact"
               className="text-sm font-medium hover:text-primary transition-colors"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 e.preventDefault()
                 document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
               }}
@@ -219,10 +269,10 @@ export default function Home() {
                 <Link
                   href="#about"
                   className="text-lg font-medium hover:text-primary transition-colors p-2 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/20"
-                  onClick={(e: React.MouseEvent) => {
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.preventDefault()
                     document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
-                    ;(document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
+                      ; (document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
                     return
                   }}
                 >
@@ -231,10 +281,10 @@ export default function Home() {
                 <Link
                   href="#courses"
                   className="text-lg font-medium hover:text-primary transition-colors p-2 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/20"
-                  onClick={(e: React.MouseEvent) => {
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.preventDefault()
                     document.getElementById("courses")?.scrollIntoView({ behavior: "smooth" })
-                    ;(document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
+                      ; (document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
                     return
                   }}
                 >
@@ -243,10 +293,10 @@ export default function Home() {
                 <Link
                   href="#guidance"
                   className="text-lg font-medium hover:text-primary transition-colors p-2 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/20"
-                  onClick={(e: React.MouseEvent) => {
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.preventDefault()
                     document.getElementById("guidance")?.scrollIntoView({ behavior: "smooth" })
-                    ;(document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
+                      ; (document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
                     return
                   }}
                 >
@@ -255,10 +305,10 @@ export default function Home() {
                 <Link
                   href="#location"
                   className="text-lg font-medium hover:text-primary transition-colors p-2 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/20"
-                  onClick={(e: React.MouseEvent) => {
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.preventDefault()
                     document.getElementById("location")?.scrollIntoView({ behavior: "smooth" })
-                    ;(document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
+                      ; (document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
                     return
                   }}
                 >
@@ -267,10 +317,10 @@ export default function Home() {
                 <Link
                   href="#contact"
                   className="text-lg font-medium hover:text-primary transition-colors p-2 rounded-md hover:bg-purple-100 dark:hover:bg-purple-900/20"
-                  onClick={(e: React.MouseEvent) => {
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.preventDefault()
                     document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
-                    ;(document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
+                      ; (document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
                     return
                   }}
                 >
@@ -278,9 +328,9 @@ export default function Home() {
                 </Link>
                 <Button
                   className="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-lg"
-                  onClick={(e: React.MouseEvent) => {
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     handleReserveClick(e)
-                    ;(document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
+                      ; (document.querySelector("[data-radix-collection-item]") as HTMLButtonElement)?.click() // Close the sheet
                     return
                   }}
                 >
@@ -475,7 +525,7 @@ export default function Home() {
               <Card className="overflow-hidden border-purple-200 dark:border-purple-800 bg-white/50 dark:bg-black/20 backdrop-blur-sm transform transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg" />
                 <CardHeader>
-                  <CardTitle className="text-purple-700 dark:text-purple-300">8th & 10th Grade</CardTitle>
+                  <CardTitle className="text-purple-700 dark:text-purple-300">8th to 10th Grade</CardTitle>
                   <CardDescription>Foundation courses for middle school students</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -731,12 +781,7 @@ export default function Home() {
                     <Button
                       className="mt-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md"
                       onClick={() => {
-                        toast({
-                          title: "Directions",
-                          description:
-                            "Google Maps directions will open in a new tab when integrated with the actual map service.",
-                          duration: 3000,
-                        })
+                        window.open("https://www.google.com/maps/dir/?api=1&destination=1st+Floor,+Gali+No.+1,+near+Shiv+Mandir,+Om+Market,+Om+Nagar,+Meethapur,+Badarpur,+New+Delhi+-+110044", "_blank");
                       }}
                     >
                       Get Directions
@@ -851,11 +896,6 @@ export default function Home() {
                         <option value="8th-10th">8th & 10th Grade</option>
                         <option value="11th">11th Grade</option>
                         <option value="12th">12th Grade</option>
-                        <option value="iit-jee">IIT JEE Preparation</option>
-                        <option value="neet">NEET Preparation</option>
-                        <option value="cuet">CUET Preparation</option>
-                        <option value="nda">NDA Preparation</option>
-                        <option value="other">Other</option>
                       </select>
                     </div>
                     <div className="grid gap-2">
@@ -989,7 +1029,7 @@ export default function Home() {
                       </div>
                       <div>
                         <h3 className="text-sm font-medium">Duration</h3>
-                        <p className="text-sm text-muted-foreground">Classes will be held 5 days a week</p>
+                        <p className="text-sm text-muted-foreground">Classes will be held 6 days a week</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1048,7 +1088,7 @@ export default function Home() {
                 <Input
                   id="quick-name"
                   value={quickReservationData.name}
-                  onChange={(e) => setQuickReservationData({ ...quickReservationData, name: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickReservationData({ ...quickReservationData, name: e.target.value })}
                   placeholder="Enter your full name"
                   required
                 />
@@ -1059,7 +1099,7 @@ export default function Home() {
                   id="quick-phone"
                   type="tel"
                   value={quickReservationData.phone}
-                  onChange={(e) => setQuickReservationData({ ...quickReservationData, phone: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickReservationData({ ...quickReservationData, phone: e.target.value })}
                   placeholder="Enter your phone number"
                   required
                 />
@@ -1070,7 +1110,7 @@ export default function Home() {
                   id="quick-email"
                   type="email"
                   value={quickReservationData.email}
-                  onChange={(e) => setQuickReservationData({ ...quickReservationData, email: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickReservationData({ ...quickReservationData, email: e.target.value })}
                   placeholder="Enter your email address"
                   required
                 />
@@ -1080,7 +1120,7 @@ export default function Home() {
                 <select
                   id="quick-course"
                   value={quickReservationData.course}
-                  onChange={(e) => setQuickReservationData({ ...quickReservationData, course: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setQuickReservationData({ ...quickReservationData, course: e.target.value })}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 >
@@ -1088,11 +1128,6 @@ export default function Home() {
                   <option value="8th-10th">8th & 10th Grade</option>
                   <option value="11th">11th Grade</option>
                   <option value="12th">12th Grade</option>
-                  <option value="iit-jee">IIT JEE Preparation</option>
-                  <option value="neet">NEET Preparation</option>
-                  <option value="cuet">CUET Preparation</option>
-                  <option value="nda">NDA Preparation</option>
-                  <option value="other">Other</option>
                 </select>
               </div>
             </div>

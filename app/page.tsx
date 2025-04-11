@@ -6,7 +6,6 @@ import {
   InputChangeEvent, 
   TextareaChangeEvent,
   SelectChangeEvent,
-  ButtonClickEvent 
 } from "../types/events"
 
 import { useEffect, useState } from "react"
@@ -78,7 +77,7 @@ export default function Home() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/sendEmail', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +131,7 @@ export default function Home() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/sendEmail', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -371,9 +370,7 @@ export default function Home() {
                   Topper Mantra by D.B. DUBEY Sir
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  Join one of Delhi&apos;s most trusted coaching institutes, led by the highly qualified and experienced
-                  Deepak Bhardwaj Sir — a gold medalist and top ranker in UGC NET with over a decade of teaching
-                  excellence.
+                  Join one of Delhi's most trusted coaching institutes, led by the highly qualified and experienced D.B.DUBEY Sir — a gold medalist and top ranker in UGC NET with over a decade of teaching excellence.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button
